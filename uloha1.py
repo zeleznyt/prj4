@@ -5,12 +5,11 @@ def funkce(x):
     return np.sin(x)
 
 if __name__ == '__main__':
-    Y = np.array([np.zeros(100)])
+    Y = np.zeros((20, 100))
   
     for i in range(20):
         vektor = funkce((np.array(range(100))*0.1)*(i))+i
-        Y =(np.append(Y, [vektor], axis=0))
+        Y[i,:] = vektor
 
-    # pointa: plot umi pracovat se vstupem jako je matice, matice musi byt ve spravnem tvaru. 
     plt.plot(Y.transpose())
     plt.show()
