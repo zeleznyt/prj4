@@ -4,9 +4,42 @@ import TRC_tools
 import numpy as np
 import matplotlib.pyplot as plt
 
+def normalize(_data):
+    """
+    normalize per marker channel. Out interval 0.0 - 1.0, default reserve 10 %
+    :param _data: [batch, frames, markers]
+    :return:
+    """
+    markers_count = np.size(_data, 2)
+    normed_data = _data.copy()
+    minmax = np.zeros((markers_count, 2))  # min, max
+    for i in range(markers_count):
+        _min = np.min(_data[:, :, i])
+        _max = np.max(_data[:, :, i])
+        if _max - _min == 0:
+            normed_data[:, :, i] = 0
+        else:
+            normed_data[:, :, i] = (_data[:, :, i] - _min)/(_max - _min)
+        minmax[i] = _min, _max
+    return normed_data, minmax
+
+def denormalize(_data, _minmax):
+    """
+    :param _data:
+    :param _minmax:
+    :return:
+    """
+    markers_count = np.size(_minmax, 0)
+    _den_data = _data.copy()
+    for i in range(markers_count):
+        _den_data[:, :, i] = _data[:, :, i] * (_minmax[i, 1] - _minmax[i, 0]) + _minmax[i, 0]
+    return _den_data
+
+
+
 if __name__ == '__main__':
-    # path_to_data = 'C:/Users/Tomas/Documents/Škola/FAV/PRJ/PRJ4/Data'
-    path_to_data = '/home/jedle/data/Sign-Language/TRC_files/dict_fingerless/'
+    path_to_data = 'C:/Users/Tomas/Documents/Škola/FAV/PRJ/PRJ4/Data'
+    # path_to_data = '/home/jedle/data/Sign-Language/TRC_files/dict_fingerless/'
     TRC_infile = os.path.join(path_to_data, 'projevy_pocasi_02.TRC')
     # slovnik_infile = 'pocasi_slovnik9.txt'
     trajectory_matrix, metadata = TRC_tools.TRC_load(TRC_infile)
@@ -32,7 +65,7 @@ if __name__ == '__main__':
     int_len = znak_2_annotation-znak_1_annotation
     res_traj = PRJ4_tools.sign_synthesis(znak_1, znak_2, int_len, 'kubic')
     # res_traj = PRJ4_tools.sign_synthesis(znak_1, znak_2, int_len, 'linear')
-
+    print(res_traj[:,12])
     concatenated = np.concatenate((znak_1[:-1, :], res_traj, znak_2), axis=0)
     # print(np.shape(concatenated))
     #
@@ -54,17 +87,37 @@ if __name__ == '__main__':
     # plt.show()
 
     concatenated = concatenated.reshape((-1, int(np.size(concatenated, 1)/3), 3))
-    print(np.shape(concatenated))
+    # print(np.shape(concatenated))
     concentrated = np.linalg.norm(concatenated, axis=2)
-    print(np.shape(concentrated))
+    # print(np.shape(concentrated))
     velocity = np.diff(concentrated, axis=0)
-    print(np.shape(velocity))
+    # print(np.shape(velocity))
     accel = np.diff(velocity)
 
+    normalised, minmax = normalize(np.expand_dims(res_traj, axis = 0))
+    denormalised = denormalize(normalised, minmax)
+
+    print(np.shape(normalised))
+    print(np.shape(res_traj))
+    plt.plot(normalised[0,4:18,37:40])
+    plt.plot(normalize(np.expand_dims(concentrated, axis = 0))[0][0,4:18:,12])
+    
+
+    # _,axs = plt.subplots(4)
+    # axs[0].plot(res_traj[4:18, 37])
+    # axs[1].plot(res_traj[4:18, 38])
+    # axs[2].plot(res_traj[4:18, 39])
+    # axs[3].plot(concentrated[4:18:,12])
     # plt.plot(concatenated[:, 0, :])
     # plt.plot(concentrated[:, 0])
-    plt.plot(velocity)
-    # plt.plot(accel[:, 0])
+    
+    print(np.shape(concentrated))
+    # print(velocity[:,12])
+    # print(concentrated[:,12])
+    plt.figure()
+    plt.plot(velocity[:])
+    plt.figure()
+    plt.plot(accel)
     plt.show()
     # _, axs = plt.subplots(3)
     # v, a = PRJ4_tools.sign_velocity_acceleration(concatenated)
