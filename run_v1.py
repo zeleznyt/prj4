@@ -19,38 +19,23 @@ if __name__ == '__main__':
     #
 
     znak_1_source_trajectory = trajectory_matrix
-    znak_1_annotation = 2967
-    znak_1_history_length = 2
-    znak_1 = znak_1_source_trajectory[znak_1_annotation-znak_1_history_length:znak_1_annotation, :]
+    znak_1_annotation = 2969
+    znak_1_history_length = 5
+    znak_1 = znak_1_source_trajectory[znak_1_annotation-znak_1_history_length+1:znak_1_annotation+1, :]
 
     znak_2_source_trajectory = trajectory_matrix
     znak_2_annotation = 3009
-    znak_2_future_length = 2
+    znak_2_future_length = 5
     znak_2 = znak_2_source_trajectory[znak_2_annotation:znak_2_annotation+znak_2_future_length, :]
 
     int_len = znak_2_annotation-znak_1_annotation
     res_traj = PRJ4_tools.sign_synthesis(znak_1, znak_2, int_len, 'kubic')
     
-    
-    _,axs = plt.subplots(3)
-    v,a = PRJ4_tools.sign_velocity_acceleration(res_traj)
-    axs[0].plot(a[:,:1])
-    axs[1].plot(v[:,:1])
-    axs[2].plot(res_traj[:,:3])
-    plt.show()
-
-    _,axs = plt.subplots(3)
-    axs[0].plot(res_traj[:,:1])
-    axs[1].plot(res_traj[:,1:2])
-    axs[2].plot(res_traj[:,2:3])
-    plt.show()
-
-    print(np.shape(znak_1))
     new_TRC = np.concatenate([znak_1_source_trajectory[znak_1_annotation-30:znak_1_annotation], res_traj, znak_2_source_trajectory[znak_2_annotation:znak_2_annotation+30]], axis = 0)
 
     plt.plot(new_TRC[:,:3])
     plt.plot(znak_1_source_trajectory[znak_1_annotation-30:znak_2_annotation+30,:3])
-    # plt.show()
+    plt.show()
 
     # TRC_tools.show_pose_comparison(znak_1[-1,:], znak_2[0,:])
     # plt.plot(res_traj[:, :3], 'b', label='orig')
