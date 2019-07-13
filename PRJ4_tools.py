@@ -30,7 +30,7 @@ def sign_synthesis(_sign_1, _sign_2, _gap_length, _type):
                 y2 = _sign_2_t[0,traj]
                 k1 = _sign_1_t[1,traj]-_sign_1_t[0,traj]
                 k2 = _sign_2_t[1,traj]-_sign_2_t[0,traj]
-                
+
                 for frame in range(_gap_length):
                     t = (frame)/(_gap_length)
                     a = k1*_gap_length - (y2-y1)
@@ -51,15 +51,20 @@ def sign_velocity_acceleration(_sign):
     
     if np.size(_sign, 0) < 3:
         return -1
-    velocity = np.zeros((np.size(_sign, 0)-1, np.size(_sign, 1)))
-    acceleration = np.zeros((np.size(_sign, 0)-2, np.size(_sign, 1)))
+    velocity = np.zeros((np.size(_sign, 0)-1, int(np.size(_sign, 1)/3)))
+    acceleration = np.zeros((np.size(_sign, 0)-2, int(np.size(_sign, 1))))
     
     for v in range(np.size(velocity, 0)):
-        for traj in range(int(np.size(velocity, 1)/3)):
+        for traj in range(int(np.size(velocity, 1))):
             velocity[v, traj] = np.sqrt(np.power(_sign[v, 3*traj]-_sign[v+1, 3*traj], 2)+np.power(_sign[v, 3*traj+1]-_sign[v+1, 3*traj+1], 2)+np.power(_sign[v, 3*traj+2]-_sign[v+1, 3*traj+2], 2))
             
     for a in range(np.size(acceleration, 0)):
         for traj in range(np.size(acceleration, 1)):
             acceleration[a, traj] = (velocity[a, traj]-velocity[a+1, traj])
     
+    max_velocity = np.amax(abs(velocity))
+    max_acceleration = np.amax(abs(acceleration))
+    arg_max_vel = (np.amax(abs(velocity), axis = 0))
+    print(max_velocity)
+    print(arg_max_vel)
     return velocity, acceleration
