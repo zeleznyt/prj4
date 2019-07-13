@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    path_to_data = 'C:/Users/Tomas/Documents/Škola/FAV/PRJ/PRJ4/Data'
+    path_to_data = 'D:/Škola/FAV/PRJ/PRJ4/Data'
     TRC_infile = os.path.join(path_to_data, 'projevy_pocasi_02.TRC')
     # slovnik_infile = 'pocasi_slovnik9.txt'
     trajectory_matrix, metadata = TRC_tools.TRC_load(TRC_infile)
@@ -33,16 +33,13 @@ if __name__ == '__main__':
     
     new_TRC = np.concatenate([znak_1_source_trajectory[znak_1_annotation-30:znak_1_annotation], res_traj, znak_2_source_trajectory[znak_2_annotation:znak_2_annotation+30]], axis = 0)
 
-    _,axs = plt.subplots(3)
-    v,a = PRJ4_tools.sign_velocity_acceleration(res_traj)
-    print(np.shape(v))
-    print(np.shape(a))
-    print(np.shape(res_traj))
-    axs[0].plot(a)
-    axs[1].plot(v)
-    axs[2].plot(res_traj[:,:3])
+    max_vel, max_acc, argmax_vel, argmax_acc = PRJ4_tools.sign_velocity_acceleration(res_traj)
+    print(max_vel)
+    print(argmax_vel)
+    print(max_acc)
+    print(argmax_acc)
+
     plt.figure()
-    
     plt.plot(new_TRC[:,:3])
     plt.plot(znak_1_source_trajectory[znak_1_annotation-30:znak_2_annotation+30,:3])
     plt.show()
