@@ -1,5 +1,7 @@
 import numpy as np
+import LSTM_tools
 import matplotlib.pyplot as plt
+
 
 def sign_synthesis(_sign_1, _sign_2, _gap_length, _type):
     """
@@ -42,6 +44,7 @@ def sign_synthesis(_sign_1, _sign_2, _gap_length, _type):
         res = -1
     return res[1:,:]
 
+
 def sign_velocity_acceleration(_sign):
     """
     Calculates max velocity and acceleration in the sign
@@ -74,7 +77,52 @@ def sign_velocity_acceleration(_sign):
 
     max_velocity = np.amax(abs(velocity))
     max_acceleration = np.amax(abs(acceleration))
-    arg_max_vel = np.argmax(np.amax(abs(velocity), axis=0))
-    arg_max_acc = np.argmax(np.amax(abs(acceleration), axis=0))
+    arg_max_vel = np.argmax(np.amax(abs(velocity), axis=1))
+    arg_max_acc = np.argmax(np.amax(abs(acceleration), axis=1))
 
     return max_velocity, max_acceleration, arg_max_vel, arg_max_acc
+
+
+def sign_error(_original, _approximation, _type_error, _type_return):
+    """
+    Calculates the error between two signs
+    :param _original: trajectory frames X markers
+    :param _approximation: trajectory frames X markers
+            _sign_1 and _sign_2 must be same length
+    :param _type_error: type of error: 'absolute', 'relative'
+    :param _type_return: type of return:'total' (type = float) for a sum of errors
+                                        'vector' (type = numpy.ndarray) for a vector of errors for each frame
+    :return: error(based on params)
+    """
+    if np.shape(_original) != np.shape(_approximation):
+        return -1
+    else:
+        if _type_error == 'absolute':
+            error = np.zeros(np.size(_original, 0))
+            for frame in range(np.size(error)):
+                error[frame] = np.sum(abs(_approximation[frame, :]-_original[frame, :]))
+            if _type_return == 'total':
+                error = np.sum(error)
+        elif _type_error == 'relative':
+            _original_norm, orig_minmax = LSTM_tools.normalize(np.expand_dims(_original, axis=0))
+            _approximation_norm, _approx_minmax = LSTM_tools.normalize(np.expand_dims(_approximation, axis=0))
+            _original_norm = _original_norm[0, :, :]
+            _approximation_norm = _approximation_norm[0, :, :]
+
+            error = np.zeros(np.size(_original_norm, 0))
+
+            if _type_return == 'vector':
+                for frame in range(np.size(error)):
+                    sum_orig = np.sum(_original_norm[frame, :])
+                    sum_approx = np.sum(_approximation_norm[frame, :])
+                    error[frame] = (sum_orig-sum_approx)/sum_orig
+            elif _type_return == 'total':
+                sum_orig = np.sum(_original_norm)
+                sum_approx = np.sum(_approximation_norm)
+                error = (sum_orig-sum_approx)/sum_orig
+            else:
+                error = -1
+        else:
+            error = -1
+
+    return error

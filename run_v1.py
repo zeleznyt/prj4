@@ -30,14 +30,21 @@ if __name__ == '__main__':
 
     int_len = znak_2_annotation-znak_1_annotation
     res_traj = PRJ4_tools.sign_synthesis(znak_1, znak_2, int_len, 'kubic')
-    
+    orig_traj = trajectory_matrix[znak_1_annotation+1:znak_2_annotation]
+
+    error = PRJ4_tools.sign_error(orig_traj, res_traj, 'relative', 'vector')
+    print(np.shape(error))
+    print(type(error))
+    plt.figure()
+    plt.plot(error)
+
     new_TRC = np.concatenate([znak_1_source_trajectory[znak_1_annotation-30:znak_1_annotation], res_traj, znak_2_source_trajectory[znak_2_annotation:znak_2_annotation+30]], axis = 0)
 
-    max_vel, max_acc, argmax_vel, argmax_acc = PRJ4_tools.sign_velocity_acceleration(res_traj)
-    print(max_vel)
-    print(argmax_vel)
-    print(max_acc)
-    print(argmax_acc)
+    # max_vel, max_acc, argmax_vel, argmax_acc = PRJ4_tools.sign_velocity_acceleration(res_traj)
+    # print(max_vel)
+    # print(argmax_vel)
+    # print(max_acc)
+    # print(argmax_acc)
 
     plt.figure()
     plt.plot(new_TRC[:,:3])
