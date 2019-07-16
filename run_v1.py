@@ -32,9 +32,11 @@ if __name__ == '__main__':
     res_traj = PRJ4_tools.sign_synthesis(znak_1, znak_2, int_len, 'kubic')
     orig_traj = trajectory_matrix[znak_1_annotation+1:znak_2_annotation]
 
-    error = PRJ4_tools.sign_error(orig_traj, res_traj, 'relative', 'vector')
+    print(PRJ4_tools.compare_velocity(orig_traj, res_traj))
+
+    error = PRJ4_tools.sign_error(orig_traj, res_traj)
     print(np.shape(error))
-    print(type(error))
+    print(error)
     plt.figure()
     plt.plot(error)
 

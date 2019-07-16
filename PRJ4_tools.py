@@ -66,14 +66,14 @@ def sign_velocity_acceleration(_sign):
         for traj in range(np.size(acceleration, 1)):
             acceleration[a, traj] = (velocity[a, traj]-velocity[a+1, traj])
 
-    plt.figure()
-    plt.plot(velocity)
-    plt.title('Velocity')
-    print(np.shape(velocity))
-    plt.figure()
-    plt.plot(acceleration)
-    plt.title('Acceleration')
-    print(np.shape(acceleration))
+    # plt.figure()
+    # plt.plot(velocity)
+    # plt.title('Velocity')
+    # print(np.shape(velocity))
+    # plt.figure()
+    # plt.plot(acceleration)
+    # plt.title('Acceleration')
+    # print(np.shape(acceleration))
 
     max_velocity = np.amax(abs(velocity))
     max_acceleration = np.amax(abs(acceleration))
@@ -83,24 +83,43 @@ def sign_velocity_acceleration(_sign):
     return max_velocity, max_acceleration, arg_max_vel, arg_max_acc
 
 
-def sign_error(_original, _approximation, _type_error, _type_return):
+def compare_velocity(_sign_1, _sign_2):
+    """
+    Compares max velocity and acceleration of two signs
+    :param _sign_1: trajectory frames X markers
+    :param _sign_2: trajectory frames X markers
+    :return: velocity_difference, acceleration_difference
+    """
+    velocity_difference = sign_velocity_acceleration(_sign_1)[0]-sign_velocity_acceleration(_sign_2)[0]
+    acceleration_difference = sign_velocity_acceleration(_sign_1)[1]-sign_velocity_acceleration(_sign_2)[1]
+    return velocity_difference, acceleration_difference
+
+
+def sign_error(_original, _approximation, _type_error='relative', _type_return='vector', _type_summarize='avg'):
     """
     Calculates the error between two signs
     :param _original: trajectory frames X markers
     :param _approximation: trajectory frames X markers
             _sign_1 and _sign_2 must be same length
-    :param _type_error: type of error: 'absolute', 'relative'
+    :param _type_error: type of error:  'absolute': {sum(i->N)[abs(t1_i-t2_i)]}
+                                        'relative': {sum(i->N)[abs((t1_i-t2_i)/t1_i)]}
+                                        'MSE': {sum(i->N)[(t1_i-t2_i)^2]}
     :param _type_return: type of return:'total' (type = float) for a sum of errors
                                         'vector' (type = numpy.ndarray) for a vector of errors for each frame
+    :param _type_summarize: type of summarize of errors of individual trajectories: 'sum', 'avg'
     :return: error(based on params)
     """
     if np.shape(_original) != np.shape(_approximation):
+        return -1
+    if _type_summarize != 'sum' and _type_summarize != 'avg':
         return -1
     else:
         if _type_error == 'absolute':
             error = np.zeros(np.size(_original, 0))
             for frame in range(np.size(error)):
                 error[frame] = np.sum(abs(_approximation[frame, :]-_original[frame, :]))
+                if _type_summarize == 'avg':
+                    error[frame] = error[frame]/99.0
             if _type_return == 'total':
                 error = np.sum(error)
         elif _type_error == 'relative':
@@ -108,20 +127,33 @@ def sign_error(_original, _approximation, _type_error, _type_return):
             _approximation_norm, _approx_minmax = LSTM_tools.normalize(np.expand_dims(_approximation, axis=0))
             _original_norm = _original_norm[0, :, :]
             _approximation_norm = _approximation_norm[0, :, :]
-
             error = np.zeros(np.size(_original_norm, 0))
 
             if _type_return == 'vector':
                 for frame in range(np.size(error)):
                     sum_orig = np.sum(_original_norm[frame, :])
                     sum_approx = np.sum(_approximation_norm[frame, :])
+                    if _type_summarize == 'avg':
+                        sum_orig = sum_orig/99.0
+                        sum_approx = sum_approx/99.0
                     error[frame] = (sum_orig-sum_approx)/sum_orig
             elif _type_return == 'total':
                 sum_orig = np.sum(_original_norm)
                 sum_approx = np.sum(_approximation_norm)
+                if _type_summarize == 'avg':
+                    sum_orig = sum_orig/99.0
+                    sum_approx = sum_approx/99.0
                 error = (sum_orig-sum_approx)/sum_orig
             else:
                 error = -1
+        elif _type_error == 'MSE' or _type_error == 'mse':
+            error = np.zeros(np.size(_original, 0))
+            for frame in range(np.size(error)):
+                error[frame] = np.sum(np.power(_approximation[frame, :] - _original[frame, :], 2))
+                if _type_summarize == 'avg':
+                    error[frame] = error[frame]/99.0
+            if _type_return == 'total':
+                error = np.sum(error)/np.size(error)
         else:
             error = -1
 
