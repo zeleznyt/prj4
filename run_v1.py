@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     path_to_data = 'D:/Škola/FAV/PRJ/PRJ4/Data'
-    TRC_infile = os.path.join(path_to_data, 'projevy_pocasi_02.TRC')
+    TRC_infile = os.path.join(path_to_data, 'projevy_pocasi_02_fullfingers.TRC')
     # slovnik_infile = 'pocasi_slovnik9.txt'
     trajectory_matrix, metadata = TRC_tools.TRC_load(TRC_infile)
     # slovnik = TRC_tools.dict_read(slovnik_infile)
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     print(PRJ4_tools.compare_velocity(orig_traj, res_traj))
 
-    error = PRJ4_tools.sign_error(orig_traj, res_traj)
+    error = PRJ4_tools.sign_error(orig_traj, res_traj, 'mse')
     print(np.shape(error))
     print(error)
     plt.figure()

@@ -119,7 +119,7 @@ def sign_error(_original, _approximation, _type_error='relative', _type_return='
             for frame in range(np.size(error)):
                 error[frame] = np.sum(abs(_approximation[frame, :]-_original[frame, :]))
                 if _type_summarize == 'avg':
-                    error[frame] = error[frame]/99.0
+                    error[frame] = error[frame]/np.size(_original, 1)
             if _type_return == 'total':
                 error = np.sum(error)
         elif _type_error == 'relative':
@@ -134,15 +134,15 @@ def sign_error(_original, _approximation, _type_error='relative', _type_return='
                     sum_orig = np.sum(_original_norm[frame, :])
                     sum_approx = np.sum(_approximation_norm[frame, :])
                     if _type_summarize == 'avg':
-                        sum_orig = sum_orig/99.0
-                        sum_approx = sum_approx/99.0
+                        sum_orig = sum_orig/np.size(_original, 1)
+                        sum_approx = sum_approx/np.size(_original, 1)
                     error[frame] = (sum_orig-sum_approx)/sum_orig
             elif _type_return == 'total':
                 sum_orig = np.sum(_original_norm)
                 sum_approx = np.sum(_approximation_norm)
                 if _type_summarize == 'avg':
-                    sum_orig = sum_orig/99.0
-                    sum_approx = sum_approx/99.0
+                    sum_orig = sum_orig/np.size(_original, 1)
+                    sum_approx = sum_approx/np.size(_original, 1)
                 error = (sum_orig-sum_approx)/sum_orig
             else:
                 error = -1
@@ -151,7 +151,7 @@ def sign_error(_original, _approximation, _type_error='relative', _type_return='
             for frame in range(np.size(error)):
                 error[frame] = np.sum(np.power(_approximation[frame, :] - _original[frame, :], 2))
                 if _type_summarize == 'avg':
-                    error[frame] = error[frame]/99.0
+                    error[frame] = error[frame]/np.size(_original, 1)
             if _type_return == 'total':
                 error = np.sum(error)/np.size(error)
         else:
