@@ -33,11 +33,11 @@ def sign_synthesis(_sign_1, _sign_2, _gap_length, _type):
                 y2 = _sign_2_t[0, traj]
                 k1 = _sign_1_t[1, traj]-_sign_1_t[0, traj]
                 k2 = _sign_2_t[1, traj]-_sign_2_t[0, traj]
+                a = k1*_gap_length - (y2-y1)
+                b = -k2*_gap_length + (y2-y1)
 
                 for frame in range(_gap_length):
                     t = frame/_gap_length
-                    a = k1*_gap_length - (y2-y1)
-                    b = -k2*_gap_length + (y2-y1)
                     inter[frame, traj] = (1-t)*y1 + t*y2 + t*(1-t)*((1-t)*a + t*b)
             res = inter
     else:
@@ -47,9 +47,9 @@ def sign_synthesis(_sign_1, _sign_2, _gap_length, _type):
 
 def sign_velocity_acceleration(_sign):
     """
-    Calculates max velocity and acceleration in the sign
+    Calculates velocity and acceleration in the sign
     :param _sign: trajectory frames X markers
-    :return: max_velocity, max_acceleration, arg_max_vel, arg_max_acc (type = float, float, int, int)
+    :return: two vectors (length = frames): velocity, acceleration
     Uses the right difference: v(t) = x(t) - x(t+1)
     """
 
@@ -66,15 +66,17 @@ def sign_velocity_acceleration(_sign):
         for traj in range(np.size(acceleration, 1)):
             acceleration[a, traj] = (velocity[a, traj]-velocity[a+1, traj])
 
-    # plt.figure()
-    # plt.plot(velocity)
-    # plt.title('Velocity')
-    # print(np.shape(velocity))
-    # plt.figure()
-    # plt.plot(acceleration)
-    # plt.title('Acceleration')
-    # print(np.shape(acceleration))
+    return velocity, acceleration
 
+
+def max_velocity_acceleration(_sign):
+    """
+    Calculates max velocity and acceleration in the sign
+    :param _sign: trajectory frames X markers
+    :return: max_velocity, max_acceleration, arg_max_vel, arg_max_acc (type = float, float, int, int)
+    """
+
+    velocity, acceleration = sign_velocity_acceleration(_sign)
     max_velocity = np.amax(abs(velocity))
     max_acceleration = np.amax(abs(acceleration))
     arg_max_vel = np.argmax(np.amax(abs(velocity), axis=1))
@@ -90,8 +92,8 @@ def compare_velocity(_sign_1, _sign_2):
     :param _sign_2: trajectory frames X markers
     :return: velocity_difference, acceleration_difference
     """
-    velocity_difference = sign_velocity_acceleration(_sign_1)[0]-sign_velocity_acceleration(_sign_2)[0]
-    acceleration_difference = sign_velocity_acceleration(_sign_1)[1]-sign_velocity_acceleration(_sign_2)[1]
+    velocity_difference = max_velocity_acceleration(_sign_1)[0]-max_velocity_acceleration(_sign_2)[0]
+    acceleration_difference = max_velocity_acceleration(_sign_1)[1]-max_velocity_acceleration(_sign_2)[1]
     return velocity_difference, acceleration_difference
 
 
